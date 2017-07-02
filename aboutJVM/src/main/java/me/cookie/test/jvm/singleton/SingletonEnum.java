@@ -28,6 +28,7 @@ public enum SingletonEnum {
     }
 
     SingletonEnum(String name,String value){
-        System.out.println("load");
+        this.name = name;
+        this.value = value;
     }
 }

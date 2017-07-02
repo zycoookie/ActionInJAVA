@@ -3,13 +3,14 @@ package me.cookie.test.jvm;
 import com.alibaba.fastjson.JSONObject;
 import me.cookie.test.jvm.classload.Sub;
 import me.cookie.test.jvm.singleton.Singleton;
+import me.cookie.test.jvm.singleton.SingletonEnum;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
-import me.cookie.test.jvm.singleton.SingletonEnum;
 import org.junit.Test;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 
+import java.io.*;
 import java.lang.reflect.Method;
 import java.util.Calendar;
 import java.util.stream.Stream;
@@ -99,8 +100,39 @@ public class TestCglib {
      */
     @Test
     public void testEnumDeserialize(){
-        JSONObject jsonObject = (JSONObject) JSONObject.toJSON(SingletonEnum.Singleton);
-        System.out.println(jsonObject);
+//        JSONObject jsonObject = (JSONObject) JSONObject.toJSON(SingletonEnum.Singleton);
+//        System.out.println(jsonObject);
+        ObjectOutputStream objectOutputStream = null;
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try {
+            objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+        System.out.println(0);
+        try {
+            SingletonEnum e = SingletonEnum.Singleton;
+            System.out.println(e.getName() + e.getValue());
+            objectOutputStream.writeObject(e);
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+
+        System.out.println(String.valueOf(byteArrayOutputStream.toByteArray()));
+
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+
+        try {
+            ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
+            SingletonEnum e = (SingletonEnum) objectInputStream.readObject();
+            e.setValue("change");
+            System.out.println(e.getName()+e.getValue());
+            System.out.println(SingletonEnum.Singleton.getName()+SingletonEnum.Singleton.getValue());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -124,8 +156,7 @@ public class TestCglib {
         end = System.currentTimeMillis();
         System.out.println(end-start);
     }
-
-    @Test
+        @Test
     public void testDate(){
         Calendar calendar = Calendar.getInstance();
 //        calendar.set(1970,1,1,0,0,0);
